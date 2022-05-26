@@ -16,11 +16,11 @@ public class Follow {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name="follower_id", referencedColumnName = "id", nullable = false)
     private User follower;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name="followed_id", referencedColumnName = "id", nullable = false)
     private User followed;
 

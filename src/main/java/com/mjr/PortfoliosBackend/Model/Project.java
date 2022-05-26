@@ -16,7 +16,7 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name="user_id", referencedColumnName = "id", nullable = false)
     private User owner;
 

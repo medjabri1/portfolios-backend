@@ -7,8 +7,8 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "likes")
-public class Like {
+@Table(name = "favorites")
+public class Favorite {
 
     // ATTRIBUTES
 
@@ -31,7 +31,7 @@ public class Like {
 
     // CONSTRUCTORS
 
-    public Like() {
+    public Favorite() {
     }
 
     // GETS / SETS
