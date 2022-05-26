@@ -70,7 +70,7 @@ public class ProjectDetailsController {
 
     // ADD NEW PROJECT DETAILS
 
-    @PutMapping("/new")
+    @PostMapping("/new")
     public HashMap<String, Object> addNewProjectDetails(@RequestBody ProjectDetails projectDetails) {
 
         HashMap<String, Object> response = new HashMap<>();
@@ -100,7 +100,7 @@ public class ProjectDetailsController {
 
     // UPDATE PROJECT DETAILS
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public HashMap<String, Object> updateProjectDetails(@RequestBody ProjectDetails projectDetails) {
 
         HashMap<String, Object> response = new HashMap<>();

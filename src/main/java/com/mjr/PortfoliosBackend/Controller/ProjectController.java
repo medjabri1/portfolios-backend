@@ -72,7 +72,7 @@ public class ProjectController {
 
     // ADD NEW PROJECT
 
-    @PutMapping("/new")
+    @PostMapping("/new")
     public HashMap<String, Object> addNewProject(@RequestBody Project project) {
 
         HashMap<String, Object> response = new HashMap<>();
@@ -93,7 +93,7 @@ public class ProjectController {
 
     // UPDATE PROJECT
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public HashMap<String, Object> updateProject(@RequestBody Project project) {
 
         HashMap<String, Object> response = new HashMap<>();
