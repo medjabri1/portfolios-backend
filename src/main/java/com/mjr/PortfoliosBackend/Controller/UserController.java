@@ -16,6 +16,7 @@ import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin(origins = { "http://localhost:3000" }, allowedHeaders = "*", allowCredentials = "true")
 public class UserController {
 
     // PASSWORD ENCODER
