@@ -64,7 +64,7 @@ public class ProjectController {
 
         } else {
             // USER DOESN'T EXIST
-            response.put("status", 1);
+            response.put("status", 0);
             response.put("error", "USER DOESN'T EXIST");
         }
 

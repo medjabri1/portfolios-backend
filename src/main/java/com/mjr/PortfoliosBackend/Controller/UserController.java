@@ -2,16 +2,24 @@ package com.mjr.PortfoliosBackend.Controller;
 
 import com.mjr.PortfoliosBackend.Model.User;
 import com.mjr.PortfoliosBackend.Service.UserService.UserService;
+import com.mjr.PortfoliosBackend.Utility.FileUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import org.apache.commons.io.IOUtils;
+
 
 
 @RestController
@@ -30,6 +38,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    ServletContext context;
 
     // GET LIST OF ALL USERS
 
@@ -98,6 +109,7 @@ public class UserController {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedAt(new Date());
             response.put("status", 1);
+            response.put("action", "SIGNED UP SUCCESSFULLY");
             response.put("user", userService.saveUser(user));
             //response.put("user", user);
         }
@@ -178,16 +190,136 @@ public class UserController {
         return response;
     }
 
-    // TEST
+    // UPDATE USER
 
-    @GetMapping("test")
-    public HashMap<String, Object> test() {
+    @PutMapping("/update")
+    public HashMap<String, Object> updateUser(@RequestBody User user) {
 
         HashMap<String, Object> response = new HashMap<>();
 
-        response.put("status", 10);
+        if(userService.userExist(user.getId())) {
+            // USER EXIST
+
+            User previousData = userService.getUser(user.getId());
+
+            if(previousData.getEmail() ==  user.getEmail()) {
+                // SAME EMAIL -> NO PROBLEM
+                userService.updateUser(user);
+
+                response.put("status", 1);
+                response.put("result", "USER UPDATED");
+
+            } else {
+                // EMAIL CHANGED
+                if(!userService.userExistEmail(user.getEmail())) {
+                    // EMAIL IS FREE FOR USE
+
+                    response.put("status", 1);
+                    response.put("action", "USER UPDATED");
+
+                } else {
+                    // EMAIL ALREADY TAKEN BY ANOTHER ACCOUNT
+
+                    response.put("status", 0);
+                    response.put("error", "EMAIL ALREADY TAKEN");
+
+                }
+            }
+
+        } else {
+            // USER DOESN'T EXIST
+            response.put("status", 0);
+            response.put("error", "USER DOESN'T EXIST");
+        }
+
+        return response;
+
+    }
+
+    // CHANGE USER PHOTO
+
+    @PostMapping("/update/photo")
+    public HashMap<String, Object> updatePhoto(
+            @RequestParam(name = "id") int id,
+            @RequestParam("image") MultipartFile multipartFile)
+    throws IOException {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(userService.userExist(id)) {
+            // USER EXIST
+
+            User user = userService.getUser(id);
+            String previousPhoto = user.getPhoto();
+
+            String currentTime = new SimpleDateFormat("yyyy-mm-dd---hh-mm-ss").format(Calendar.getInstance().getTime());
+            String originalFileName = multipartFile.getOriginalFilename();
+
+            String fileName = "profile---"+ user.getId() +"---"+ currentTime;
+
+            fileName = fileName +"."+ originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+
+            user.setPhoto(fileName);
+            userService.updateUser(user);
+
+            String uploadPath = "upload/user-photos";
+
+            FileUploadUtil.saveFile(uploadPath, fileName, multipartFile);
+
+            if(previousPhoto != null) {
+
+                String folderPath = new FileSystemResource("upload/user-photos/").getFile().getAbsolutePath();
+
+                File previous_image_file = new File(folderPath +"/"+ previousPhoto);
+
+                if(previous_image_file != null) {
+                    response.put("previous", "deleted");
+                    previous_image_file.delete();
+                } else {
+                    response.put("previous", "not found");
+                }
+            } else {
+                response.put("previous", "null");
+            }
+
+            response.put("status", 1);
+            response.put("fileName", fileName);
+            response.put("action", "USER PHOTO UPDATED");
+
+        } else {
+            // USER DOESN'T EXIST
+            response.put("status", 0);
+            response.put("error", "USER DOESN'T EXIST");
+        }
 
         return response;
     }
+
+    // RETURN USER PHOTO
+
+    @GetMapping("/photo/")
+    @ResponseBody
+        public void  getImage(@RequestParam(name = "filename") String filename, HttpServletResponse response) {
+
+        String folderPath = new FileSystemResource("upload/user-photos/").getFile().getAbsolutePath();
+
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(response.getOutputStream());
+            FileInputStream fis = new FileInputStream(folderPath+"/"+filename);
+            int len;
+            byte[] buf = new byte[1024];
+            while((len = fis.read(buf)) > 0) {
+                bos.write(buf,0,len);
+            }
+            bos.close();
+            response.flushBuffer();
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+            response.setStatus(404);
+        }
+
+    }
+
 
 }

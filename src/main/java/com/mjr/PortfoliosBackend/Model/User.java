@@ -29,6 +29,9 @@ public class User {
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @Column(nullable = true, length = 200)
+    private String photo;
+
     @Column(nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
@@ -85,6 +88,14 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public Date getBirthDate() {

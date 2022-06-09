@@ -23,7 +23,13 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 
 	implementation 'org.springframework.session:spring-session-jdbc'
+
+	// https://mvnrepository.com/artifact/commons-io/commons-io
+	implementation 'commons-io:commons-io:2.6'
+
+
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
