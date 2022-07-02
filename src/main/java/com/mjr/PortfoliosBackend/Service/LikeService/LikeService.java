@@ -19,6 +19,8 @@ public interface LikeService {
     // GET PROJECT LIKES
     public List<Like> getProjectLikes(int project_id);
 
+    public Like getUserLikeProject(int user_id, int project_id);
+
     // CHECK EXIST
     public boolean likeExist(int id);
     public boolean likeExist(int user_id, int project_id);

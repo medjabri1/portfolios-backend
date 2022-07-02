@@ -1,6 +1,10 @@
 package com.mjr.PortfoliosBackend.Controller;
 
 import com.mjr.PortfoliosBackend.Model.User;
+import com.mjr.PortfoliosBackend.Service.FavoriteService.FavoriteService;
+import com.mjr.PortfoliosBackend.Service.FollowService.FollowService;
+import com.mjr.PortfoliosBackend.Service.LikeService.LikeService;
+import com.mjr.PortfoliosBackend.Service.ProjectService.ProjectService;
 import com.mjr.PortfoliosBackend.Service.UserService.UserService;
 import com.mjr.PortfoliosBackend.Utility.FileUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +42,18 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FavoriteService favoriteService;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Autowired
     ServletContext context;
@@ -202,7 +218,16 @@ public class UserController {
 
             User previousData = userService.getUser(user.getId());
 
-            if(previousData.getEmail() ==  user.getEmail()) {
+            if(user.getFirstName() == null) user.setFirstName(previousData.getFirstName());
+            if(user.getLastName() == null) user.setLastName(previousData.getLastName());
+
+            if(user.getBirthDate() == null) user.setBirthDate(previousData.getBirthDate());
+
+            user.setPassword(previousData.getPassword());
+            user.setPhoto(previousData.getPhoto());
+            user.setCreatedAt(previousData.getCreatedAt());
+
+            if(previousData.getEmail().equals(user.getEmail())) {
                 // SAME EMAIL -> NO PROBLEM
                 userService.updateUser(user);
 
@@ -213,6 +238,7 @@ public class UserController {
                 // EMAIL CHANGED
                 if(!userService.userExistEmail(user.getEmail())) {
                     // EMAIL IS FREE FOR USE
+                    userService.updateUser(user);
 
                     response.put("status", 1);
                     response.put("action", "USER UPDATED");
@@ -234,6 +260,50 @@ public class UserController {
 
         return response;
 
+    }
+
+    // UPDATE USER PASSWORD
+
+    @PutMapping("/update/password")
+    public HashMap<String, Object> updateUserPassword(@RequestBody Map<String, Object> payload) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        int id = Integer.parseInt(String.valueOf(payload.get("id")));
+        String currentPassword = String.valueOf(payload.get("currentPassword"));
+        String newPassword = String.valueOf(payload.get("newPassword"));
+
+        if(userService.userExist(id)) {
+            // USER EXISTS
+            User current_user = userService.getUser(id);
+
+            if(passwordEncoder.matches(currentPassword, current_user.getPassword())) {
+                // Current Password matches
+                current_user.setPassword(passwordEncoder.encode(newPassword));
+                if(userService.updateUser(current_user)) {
+                    // PASSWORD UPDATED
+                    response.put("status", 1);
+                    response.put("action", "PASSWORD UPDATED");
+                } else {
+                    // PASSWORD NOT UPDATED
+                    response.put("status", 0);
+                    response.put("error", "ERROR IN THE USER UPDATE OPERATION");
+                }
+
+            } else {
+                // Incorrect current password
+                response.put("status", 0);
+                response.put("error", "INCORRECT CURRENT PASSWORD");
+            }
+
+        } else {
+            // USER DOESN'T EXIST
+            response.put("status", 0);
+            response.put("error", "USER DOESN'T EXIST");
+            response.put("status_code", 404);
+        }
+
+        return response;
     }
 
     // CHANGE USER PHOTO
@@ -272,9 +342,12 @@ public class UserController {
 
                 File previous_image_file = new File(folderPath +"/"+ previousPhoto);
 
-                if(previous_image_file != null) {
-                    response.put("previous", "deleted");
-                    previous_image_file.delete();
+                if(previous_image_file.exists()) {
+                    if(previous_image_file.delete()) {
+                        response.put("previous", "deleted");
+                    } else {
+                        response.put("previous", "NOT DELETED");
+                    }
                 } else {
                     response.put("previous", "not found");
                 }
@@ -299,7 +372,7 @@ public class UserController {
 
     @GetMapping("/photo/")
     @ResponseBody
-        public void  getImage(@RequestParam(name = "filename") String filename, HttpServletResponse response) {
+    public void  getImage(@RequestParam(name = "filename") String filename, HttpServletResponse response) {
 
         String folderPath = new FileSystemResource("upload/user-photos/").getFile().getAbsolutePath();
 
@@ -311,6 +384,7 @@ public class UserController {
             while((len = fis.read(buf)) > 0) {
                 bos.write(buf,0,len);
             }
+            fis.close();
             bos.close();
             response.flushBuffer();
         }
@@ -318,6 +392,41 @@ public class UserController {
             e.printStackTrace();
             response.setStatus(404);
         }
+
+    }
+
+    // GET USER STATS
+
+    @GetMapping("/stats/")
+    public HashMap<String, Object> getUserStats(@RequestParam(name = "id") int id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(userService.userExist(id)) {
+            // USER EXIST
+
+            int followers = followService.getUserFollowers(id).size();
+            int followings = followService.getUserFollowings(id).size();
+
+            int likes = likeService.getUserLikes(id).size();
+            int favorites = favoriteService.getUserFavorites(id).size();
+
+            int projects = projectService.getUserProjects(id).size();
+
+            response.put("status", 1);
+            response.put("followers", followers);
+            response.put("followings", followings);
+            response.put("favorites", favorites);
+            response.put("likes", likes);
+            response.put("projects", projects);
+
+        } else {
+            // USER DOESN'T EXIST
+            response.put("status", 0);
+            response.put("error", "USER DOESN'T EXIST");
+        }
+
+        return response;
 
     }
 

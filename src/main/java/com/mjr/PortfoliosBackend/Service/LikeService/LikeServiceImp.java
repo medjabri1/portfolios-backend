@@ -66,6 +66,11 @@ public class LikeServiceImp implements LikeService {
     }
 
     @Override
+    public Like getUserLikeProject(int user_id, int project_id) {
+        return likeRepository.getUserLikeProject(user_id, project_id);
+    }
+
+    @Override
     public boolean likeExist(int id) {
         return likeRepository.existsById(id);
     }

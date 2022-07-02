@@ -37,4 +37,12 @@ public interface FollowRepository extends JpaRepository<Follow, Integer> {
     )
     public Follow getUserFollowUser(int follower_id, int followed_id);
 
+    // DELETE FOLLOW
+
+    @Query(
+            value = "DELETE FROM follows WHERE follower_id = ?1 AND followed_id = ?2",
+            nativeQuery = true
+    )
+    public void deleteFollowByIds(int follower_id, int followed_id);
+
 }

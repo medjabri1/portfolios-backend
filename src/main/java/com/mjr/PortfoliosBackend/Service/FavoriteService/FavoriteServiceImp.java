@@ -66,6 +66,11 @@ public class FavoriteServiceImp implements FavoriteService {
     }
 
     @Override
+    public Favorite getUserFavorite(int user_id, int project_id) {
+        return favoriteRepository.getUserFavoriteProject(user_id, project_id);
+    }
+
+    @Override
     public boolean favoriteExist(int id) {
         return favoriteRepository.existsById(id);
     }

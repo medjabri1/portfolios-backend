@@ -17,6 +17,9 @@ public interface ProjectService {
     // GET USER PROJECT
     public List<Project> getUserProjects(int user_id);
 
+    // GET USER FOLLOWINGS PROJECTS
+    public List<Project> getUserFollowingsProjects(int user_id);
+
     // CHECK EXIST
     public boolean projectExist(int id);
 

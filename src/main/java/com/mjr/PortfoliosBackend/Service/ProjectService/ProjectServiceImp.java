@@ -53,6 +53,11 @@ public class ProjectServiceImp implements ProjectService {
     }
 
     @Override
+    public List<Project> getUserFollowingsProjects(int user_id) {
+        return projectRepository.getUserFollowingsProjects(user_id);
+    }
+
+    @Override
     public boolean projectExist(int id) {
         return projectRepository.existsById(id);
     }

@@ -20,4 +20,12 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     )
     public List<Project> getUserProject(int owner_id);
 
+    // GET USER FOLLOWINGS PROJECTS
+
+    @Query(
+            value = "SELECT * FROM projects WHERE user_id IN ( SELECT followed_id FROM follows WHERE follower_id = ?1)",
+            nativeQuery = true
+    )
+    public List<Project> getUserFollowingsProjects(int user_id);
+
 }

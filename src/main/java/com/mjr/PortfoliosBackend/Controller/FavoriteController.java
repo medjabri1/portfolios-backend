@@ -93,6 +93,26 @@ public class FavoriteController {
         return response;
     }
 
+    // CHECK FAVORITE
+
+    @GetMapping("/exist")
+    public HashMap<String, Object> checkUserFavoriteProject(
+            @RequestParam(name = "project_id") int project_id,
+            @RequestParam(name = "user_id") int user_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(favoriteService.favoriteExist(user_id, project_id)) {
+            // FAVORITE EXIST
+            response.put("status", 1);
+        } else {
+            // FAVORITE DOESN'T EXIST
+            response.put("status", 0);
+        }
+
+        return response;
+    }
+
     // ADD NEW FAVORITE
 
     @PostMapping("/new")
@@ -161,6 +181,29 @@ public class FavoriteController {
         if(favoriteService.favoriteExist(id)) {
             // FAVORITE EXIST
             favoriteService.deleteFavorite(id);
+            response.put("status", 1);
+
+        } else {
+            // FAVORITE DOESN'T EXIST
+            response.put("status", 0);
+            response.put("error", "FAVORITE DOESN'T EXIST");
+        }
+
+        return response;
+    }
+
+    // DELETE USER PROJECT FAVORITE
+
+    @DeleteMapping("/delete-user-favorite")
+    public HashMap<String, Object> deleteUserFavorite(
+            @RequestParam(name = "user_id") int user_id,
+            @RequestParam(name = "project_id") int project_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(favoriteService.favoriteExist(user_id, project_id)) {
+            // FAVORITE EXIST
+            favoriteService.deleteFavorite(favoriteService.getUserFavorite(user_id, project_id).getId());
             response.put("status", 1);
 
         } else {

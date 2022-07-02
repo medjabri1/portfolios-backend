@@ -1,7 +1,11 @@
 package com.mjr.PortfoliosBackend.Controller;
 
+import com.mjr.PortfoliosBackend.Model.Follow;
 import com.mjr.PortfoliosBackend.Model.Project;
 import com.mjr.PortfoliosBackend.Model.User;
+import com.mjr.PortfoliosBackend.Service.FavoriteService.FavoriteService;
+import com.mjr.PortfoliosBackend.Service.FollowService.FollowService;
+import com.mjr.PortfoliosBackend.Service.LikeService.LikeService;
 import com.mjr.PortfoliosBackend.Service.ProjectService.ProjectService;
 import com.mjr.PortfoliosBackend.Service.UserService.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,15 @@ public class ProjectController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FavoriteService favoriteService;
 
     // GET LIST OF ALL PROJECTS
 
@@ -69,6 +82,58 @@ public class ProjectController {
         }
 
         return response;
+    }
+
+    // GET USER FOLLOWINGS PROJECTS BY USER ID
+
+    @GetMapping("/user/following/")
+    public HashMap<String, Object> getUserFollowingProjects(@RequestParam(name = "user_id") int user_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(userService.userExist(user_id)) {
+            // USER EXISTS
+
+            response.put("status", 1);
+            response.put("result", projectService.getUserFollowingsProjects(user_id));
+
+        } else {
+            // USER DOESN'T EXIST
+
+            response.put("status", 0);
+            response.put("error", "USER DOESN'T EXIST");
+        }
+
+        return response;
+
+    }
+
+    // GET PROJECT STATS
+
+    @GetMapping("/stats")
+    public HashMap<String, Object> getProjectStats(@RequestParam(name = "id") int project_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(projectService.projectExist(project_id)) {
+            // PROJECT EXISTS
+
+            int likes = likeService.getProjectLikes(project_id).size();
+            int favorites = favoriteService.getProjectFavorites(project_id).size();
+
+            response.put("status", 1);
+            response.put("likes", likes);
+            response.put("favorites", favorites);
+
+        } else {
+            // PROJECT DOESN'T EXIST
+
+            response.put("status", 0);
+            response.put("error", "PROJECT DOESN'T EXIST");
+        }
+
+        return response;
+
     }
 
     // ADD NEW PROJECT

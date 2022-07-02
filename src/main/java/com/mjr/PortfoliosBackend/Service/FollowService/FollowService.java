@@ -29,4 +29,7 @@ public interface FollowService {
     // DELETE Follow
     public boolean deleteFollow(int id);
 
+    // DELETE FOLLOW
+    public boolean deleteFollow(int follower_id, int followed_id);
+
 }

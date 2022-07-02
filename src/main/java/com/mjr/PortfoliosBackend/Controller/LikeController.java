@@ -76,6 +76,26 @@ public class LikeController {
         return response;
     }
 
+    // CHECK LIKE
+
+    @GetMapping("/exist")
+    public HashMap<String, Object> checkUserLikeProject(
+            @RequestParam(name = "project_id") int project_id,
+            @RequestParam(name = "user_id") int user_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(likeService.likeExist(user_id, project_id)) {
+            // LIKE EXIST
+            response.put("status", 1);
+        } else {
+            // LIKE DOESN'T EXIST
+            response.put("status", 0);
+        }
+
+        return response;
+    }
+
     // GET LIKE BY ID
 
     @GetMapping("/id")
@@ -166,6 +186,29 @@ public class LikeController {
         if(likeService.likeExist(id)) {
             // LIKE EXIST
             likeService.deleteLike(id);
+            response.put("status", 1);
+
+        } else {
+            // LIKE DOESN'T EXIST
+            response.put("status", 0);
+            response.put("error", "LIKE DOESN'T EXIST");
+        }
+
+        return response;
+    }
+
+    // DELETE USER LIKE PROJECT
+
+    @DeleteMapping("/delete-user-like")
+    public HashMap<String, Object> deleteUserLike(
+            @RequestParam(name = "user_id") int user_id,
+            @RequestParam(name = "project_id") int project_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(likeService.likeExist(user_id, project_id)) {
+            // LIKE EXIST
+            likeService.deleteLike(likeService.getUserLikeProject(user_id, project_id).getId());
             response.put("status", 1);
 
         } else {

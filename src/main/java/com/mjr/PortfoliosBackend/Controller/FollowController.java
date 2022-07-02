@@ -88,6 +88,23 @@ public class FollowController {
         return response;
     }
 
+    // CHECK FOLLOW EXIST
+
+    @GetMapping("/exist")
+    public HashMap<String, Object> checkFollowExist(@RequestParam(name = "follower_id") int follower_id,
+                                                    @RequestParam(name = "followed_id") int followed_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(followService.followExist(follower_id, followed_id)) {
+            response.put("status", 1);
+        } else {
+            response.put("status", 0);
+        }
+
+        return response;
+    }
+
     // ADD NEW FOLLOW
 
     @PostMapping("/new")
@@ -145,6 +162,27 @@ public class FollowController {
         if(followService.followExist(id)) {
             // FOLLOW EXIST
             followService.deleteFollow(id);
+            response.put("status", 1);
+        } else {
+            // FOLLOW DOESN'T EXIST
+            response.put("status", 0);
+        }
+
+        return response;
+    }
+
+    // DELETE FOLLOW BY FOLLOWER AND FOLLOWED
+
+    @DeleteMapping("/delete-follower-followed")
+    public HashMap<String, Object> deleteFollowByFollowerFollowed(
+            @RequestParam(name = "follower_id") int follower_id,
+            @RequestParam(name = "followed_id") int followed_id) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        if(followService.followExist(follower_id, followed_id)) {
+            // FOLLOW EXIST
+            followService.deleteFollow(follower_id, followed_id);
             response.put("status", 1);
         } else {
             // FOLLOW DOESN'T EXIST

@@ -93,4 +93,10 @@ public class FollowServiceImp implements FollowService {
             return false;
         }
     }
+
+    @Override
+    public boolean deleteFollow(int follower_id, int followed_id) {
+        followRepository.deleteFollowByIds(follower_id, followed_id);
+        return true;
+    }
 }

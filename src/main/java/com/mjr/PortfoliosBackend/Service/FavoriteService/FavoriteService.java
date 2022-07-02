@@ -19,6 +19,8 @@ public interface FavoriteService {
     // GET PROJECT FAVORITES
     public List<Favorite> getProjectFavorites(int project_id);
 
+    public Favorite getUserFavorite(int user_id, int project_id);
+
     // CHECK EXIST
     public boolean favoriteExist(int id);
     public boolean favoriteExist(int user_id, int project_id);
